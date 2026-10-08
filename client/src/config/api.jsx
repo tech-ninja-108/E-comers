@@ -1,4 +1,5 @@
-import axios from "axios"
+import axios from "axios";
 export const axioxApi = axios.create({
-    baseURL:"http://localhost:3000"
-})
+  baseURL: "https://e-comers-0isu.onrender.com/api",
+  withCredentials: true,
+});

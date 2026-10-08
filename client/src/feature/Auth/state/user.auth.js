@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { loginUser } from "./thunkAuth";
 
 export const userSlice = createSlice({
   name: "user",
@@ -19,9 +20,21 @@ export const userSlice = createSlice({
       state.isLogin = false;
     },
   },
-  extraReducers:
+  extraReducers: (bundiler) => {
+    bundiler
+      .addCase(loginUser.pending, (state) => {
+        ((state.isLoading = true), (state.isLogin = false));
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        ((state.user = action.payload),
+          (state.isLoading = false),
+          (state.isLogin = true));
+      })
+      .addCase(loginUser.rejected, (state) => {
+        ((state.isLoading = false), (state.isLogin = false));
+      });
+  },
 });
 
-
-export const {userLogout,userLogin} = userSlice.actions
-export default userSlice.reducer
+export const { userLogout, userLogin } = userSlice.actions;
+export default userSlice.reducer;
