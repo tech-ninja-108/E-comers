@@ -9,4 +9,12 @@ const category = async (req, res) => {
   });
 };
 
-export { category };
+const getcategorys = async (req, res) => {
+  const list = await listModel.find().select("-__v");
+  return res.status(200).json({
+    message: "category find successfully",
+    data: list,
+  });
+};
+
+export { category , getcategorys};

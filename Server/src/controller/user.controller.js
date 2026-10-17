@@ -41,12 +41,20 @@ const userRegister = async (req, res) => {
 
   user.refreshToken = REFRESH_TOKEN;
   await user.save();
+  res.cookie("refreshToken", REFRESH_TOKEN, {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
   res.status(201).json({
     message: "User register successfully",
     data: {
       id: user._id,
       name: user.name,
       email: user.email,
+      role: user.role,
     },
     accessToken: ACCESS_TOKEN,
   });
@@ -81,6 +89,10 @@ const userLogin = async (req, res) => {
 
   res.cookie("refreshToken", REFRESH_TOKEN, {
     httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
   res.status(200).json({
@@ -89,6 +101,7 @@ const userLogin = async (req, res) => {
       id: isExistUser._id,
       name: isExistUser.name,
       email: isExistUser.email,
+      role: isExistUser.role,
     },
     accessToken: ACCESS_TOKEN,
   });
@@ -98,6 +111,7 @@ const userLogin = async (req, res) => {
 const userMe = async (req, res) => {
   const { authorization } = req.headers;
   const decode = verifyAccessToken(authorization);
+
   if (!decode) {
     return res.status(401).json({
       message: "invalid accessToken",
@@ -128,8 +142,9 @@ const userMe = async (req, res) => {
       name: user.name,
       email: user.email,
       id: user._id,
+      role: user.role,
     },
-    refreshToken: authorization,
+    accessToken: authorization,
   });
 };
 
@@ -173,7 +188,6 @@ const refreshToken = async (req, res) => {
       ],
     });
   }
-
   if (refreshToken !== user.refreshToken) {
     user.refreshToken = null;
     await user.save();
@@ -193,11 +207,46 @@ const refreshToken = async (req, res) => {
   await user.save();
   res.cookie("refreshToken", REFRESH_TOKEN, {
     httpOnly: true,
+    secure: false, // localhost par HTTP
+    sameSite: "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
+
   res.status(200).json({
     message: "Token refreshed successfully",
+    data: {
+      name: user.name,
+      email: user.email,
+      id: user._id,
+      role: user.role,
+    },
     accessToken: ACCESS_TOKEN,
   });
 };
 
-export { userRegister, userLogin, userMe, refreshToken }
+const logoutUser = async (req, res) => {
+  // Database se refresh token bhi remove karo
+  if (req.user?._id) {
+    const user = await userModel.findById(req.user._id);
+
+    if (user) {
+      user.refreshToken = null;
+      await user.save();
+    }
+  }
+
+  // Browser se refresh token cookie clear karo
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+    path: "/",
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Logout successfully",
+  });
+};
+
+export { userRegister, userLogin, userMe, refreshToken, logoutUser };

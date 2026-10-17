@@ -1,5 +1,8 @@
 import { Router } from "express";
-import ProductValidator from "../validator/product.validator.js";
+import ProductValidator, {
+  CreateImageValidator,
+  UpdateImageValidator,
+} from "../validator/product.validator.js";
 import {
   createProduct,
   deleteProduct,
@@ -7,6 +10,7 @@ import {
   getSellerProduct,
   getSingleProduct,
   singleProduct,
+  statusupdate,
   updataProduct,
 } from "../controller/product.controller.js";
 import findUser from "../middleware/funduser.middleware.js";
@@ -20,11 +24,17 @@ productRouter.post(
   "/products",
   uploads.array("images"),
   dataParse,
+  CreateImageValidator,
   ProductValidator,
   findUser,
   asyncHandler(createProduct),
 );
 productRouter.get("/products", findUser, asyncHandler(getSellerProduct));
+productRouter.patch(
+  "/statusupdate/:ProductId",
+  findUser,
+  asyncHandler(statusupdate),
+);
 productRouter.get("/allproduct", asyncHandler(getProduct));
 productRouter.delete("/products/:id", findUser, asyncHandler(deleteProduct));
 productRouter.get(
@@ -36,6 +46,7 @@ productRouter.put(
   "/products/:id",
   uploads.array("images"),
   dataParse,
+  UpdateImageValidator,
   ProductValidator,
   findUser,
   asyncHandler(updataProduct),

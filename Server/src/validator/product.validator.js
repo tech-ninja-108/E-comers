@@ -25,9 +25,6 @@ const ProductValidator = [
     .isMongoId()
     .isLength({ min: 3, max: 30 })
     .withMessage("Category must be 3 to 30 character"),
-  body("images")
-    .isArray({ min: 1, max: 5 })
-    .withMessage("At least one product image is required"),
   body("variants")
     .isArray({ min: 1 })
     .withMessage("At least one product variant is required"),
@@ -63,14 +60,6 @@ const ProductValidator = [
     .isString()
     .withMessage("Brand must be a string")
     .trim(),
-  header("authorization")
-    .exists()
-    .withMessage("AccessToken is require")
-    .bail()
-    .isString()
-    .trim()
-    .isLength({ min: 30 })
-    .withMessage("AccessToken must be min 30"),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -83,4 +72,39 @@ const ProductValidator = [
   },
 ];
 
+// Create product ke liye
+export const CreateImageValidator = body("images").custom((value, { req }) => {
+  if (!req.files || req.files.length === 0) {
+    throw new Error("At least one product image is required");
+  }
+  if (req.files.length > 5) {
+    throw new Error("Maximum 5 images allowed");
+  }
+  return true;
+});
+
+// Update product ke liye
+export const UpdateImageValidator = body("existingImages")
+  .optional()
+  .custom((value, { req }) => {
+    let existingImages = [];
+
+    try {
+      existingImages = value ? JSON.parse(value) : [];
+    } catch {
+      throw new Error("Invalid existing images");
+    }
+
+    const newImages = req.files || [];
+
+    if (existingImages.length + newImages.length === 0) {
+      throw new Error("At least one product image is required");
+    }
+
+    if (existingImages.length + newImages.length > 5) {
+      throw new Error("Maximum 5 images allowed");
+    }
+
+    return true;
+  });
 export default ProductValidator;

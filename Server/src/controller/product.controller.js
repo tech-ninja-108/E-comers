@@ -6,6 +6,14 @@ const createProduct = async (req, res) => {
     const { title, description, category, brand, tags, variants } = req.body;
     const images = req.files;
 
+    console.log(variants);
+    console.log(description);
+
+    console.log(category);
+
+    console.log(brand);
+    console.log(tags);
+
     /// filter user
     const user = req.user;
     if (user.role !== "seller") {
@@ -79,7 +87,7 @@ const getSellerProduct = async (req, res) => {
     .find({ seller: user._id })
     .populate("category", "name")
     .populate("seller", "name")
-    .select("-__v -createdAt -updatedAt -isActive");
+    .select("-__v -createdAt -updatedAt");
 
   if (product.length == 0) {
     return res.status(400).json({
@@ -130,11 +138,41 @@ const deleteProduct = async (req, res) => {
   });
 };
 
+const statusupdate = async (req, res) => {
+  const user = req.user;
+  if (user.role !== "seller") {
+    return res.status(400).json({
+      message: "You are not seller",
+      errors: [
+        {
+          type: "field",
+          msg: "You are not seller",
+        },
+      ],
+    });
+  }
+  const { ProductId } = req.params;
+  console.log(ProductId);
+
+  const product = await productModel.findById({ _id: ProductId });
+  if (!product) {
+    return res.status(404).json({
+      message: "Product not found",
+    });
+  }
+
+  product.isActive = !product.isActive;
+  await product.save();
+  return res.status(200).json({
+    message: "Product status updated",
+  });
+};
 const updataProduct = async (req, res) => {
   const { title, description, category, brand, tags, variants } = req.body;
   const images = req.files;
   const user = req.user;
   const { id } = req.params;
+
   if (user.role !== "seller") {
     return res.status(400).json({
       message: "You are not seller",
@@ -297,4 +335,5 @@ export {
   getSingleProduct,
   updataProduct,
   singleProduct,
+  statusupdate,
 };

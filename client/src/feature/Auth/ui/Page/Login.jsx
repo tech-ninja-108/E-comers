@@ -1,10 +1,27 @@
 import { useState } from "react";
 import AuthHooks from "../../hooks/AuthHooks";
+import { Navigate } from "react-router";
+import { useSelector } from "react-redux";
+import Loading from "../../../../share/NavBar/ui/pages/Loading";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const { register, handleSubmit, loginSumbit, navigate } = AuthHooks();
+  const { user, isLoading } = useSelector((state) => state.auth);
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (user?.data?.role) {
+    return (
+      <Navigate
+        to={user.data.role === "seller" ? "/seller/home" : "/home"}
+        replace
+      />
+    );
+  }
   return (
     <div className="min-h-screen bg-[#f7f7f7] flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 sm:p-10">

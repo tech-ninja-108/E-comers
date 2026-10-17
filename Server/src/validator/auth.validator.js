@@ -84,8 +84,8 @@ const meValidator = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({
-        message: "AccessToken not resived",
+      return res.status(401).json({
+        message: "AccessToken is missing or invalid",
         errors: errors.array(),
       });
     }
