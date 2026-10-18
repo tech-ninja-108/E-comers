@@ -11,6 +11,7 @@ app.use(cookiesparser());
 app.use(
   cors({
     origin: "https://e-comers-1-zvij.onrender.com",
+    // origin: "http://localhost:5173",
     credentials: true,
   }),
 );
