@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { authme, loginUser } from "./thunkAuth";
+import { authme, loginUser, RegisterUser } from "./thunkAuth";
 
 export const userSlice = createSlice({
   name: "user",
@@ -58,6 +58,23 @@ export const userSlice = createSlice({
             action.payload?.errors?.[0]?.msg ||
             action.error?.message ||
             "Something went wrong"));
+      })
+      .addCase(RegisterUser.pending, (state) => {
+        state.isLoading = true;
+        state.errors = null;
+      })
+      .addCase(RegisterUser.fulfilled, (state, action) => {
+        state.user = action.payload.data;
+        state.accessToken = action.payload.accessToken;
+        state.isLoading = false;
+        state.errors = null;
+      })
+      .addCase(RegisterUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.errors =
+          action.payload?.message ||
+          action.error?.message ||
+          "Registration failed";
       });
   },
 });

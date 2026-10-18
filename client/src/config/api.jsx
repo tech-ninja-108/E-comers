@@ -2,6 +2,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 export const axioxApi = axios.create({
   baseURL: "https://e-comers-0isu.onrender.com",
+  // baseURL: "http://localhost:3000",
   withCredentials: true,
 });
 

@@ -1,12 +1,11 @@
 import { useState } from "react";
+import AuthHooks from "../../hooks/AuthHooks";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-  };
+  const { register, handleSubmit, registerSumbit } = AuthHooks();
 
   return (
     <div className="min-h-screen bg-[#f7f7f7] flex items-center justify-center px-4 py-8">
@@ -22,7 +21,7 @@ const Register = () => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit(registerSumbit)} className="space-y-5">
           {/* Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -30,6 +29,7 @@ const Register = () => {
             </label>
 
             <input
+              {...register("name")}
               type="text"
               placeholder="Enter your full name"
               required
@@ -49,6 +49,7 @@ const Register = () => {
             </label>
 
             <input
+              {...register("email")}
               type="email"
               placeholder="Enter your email"
               required
@@ -69,6 +70,7 @@ const Register = () => {
 
             <div className="relative">
               <input
+                {...register("password")}
                 type={showPassword ? "text" : "password"}
                 placeholder="Create a password"
                 required
@@ -100,6 +102,7 @@ const Register = () => {
 
             <div className="relative">
               <input
+                {...register("conformpassword")}
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder="Confirm your password"
                 required

@@ -1,12 +1,19 @@
 import { useState } from "react";
-import { NavLink } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 import MainNabar from "../components/buyer/MainNabar";
 import { Search } from "lucide-react";
+import { UserLogoutQurey } from "../../hooks/userQuery";
+import Swal from "sweetalert2";
+import { useDispatch } from "react-redux";
+import { userLogout } from "../../../../feature/Auth/state/user.auth";
+import { toast } from "react-toastify";
 
 const Navbar = () => {
   const [search, setSearch] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
-
+  const { mutateAsync: logout, isPending } = UserLogoutQurey();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const categories = [
     "All Products",
     "Electronics",
@@ -15,6 +22,33 @@ const Navbar = () => {
     "Beauty",
     "Sports",
   ];
+
+  const LogoutHandle = () => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Do you want Logout?`,
+      icon: "warning",
+      showCancelButton: true,
+      cancelButtonText: "No, cancel",
+      confirmButtonText: "Yes, change it",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          if (isPending) {
+            return;
+          }
+          const res = await logout();
+          dispatch(userLogout());
+          sessionStorage.removeItem("accessToken");
+          navigate("/login");
+          toast.success(res.data.message);
+        } catch (e) {
+          toast.error("Logout faill");
+          console.log(e);
+        }
+      }
+    });
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
@@ -29,6 +63,7 @@ const Navbar = () => {
         setSearch={setSearch}
         menuOpen={menuOpen}
         setMenuOpen={setMenuOpen}
+        LogoutHandle={LogoutHandle}
       />
 
       {/* Mobile search */}
